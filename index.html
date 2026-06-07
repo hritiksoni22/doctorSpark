@@ -617,7 +617,7 @@
     const checks = [];
 
     for (let i = 1; i <= 50; i++) {
-      const filename = `work${i}.JPG`;
+      const filename = `work${i}.jpg`;
       checks.push(new Promise(resolve => {
         const img = new Image();
         img.onload = () => resolve(filename);
