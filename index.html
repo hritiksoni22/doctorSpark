@@ -124,6 +124,108 @@
   .toast.error { background:#ff3c3c; color:#fff; }
   @keyframes slideIn { from{transform:translateX(100px);opacity:0} to{transform:translateX(0);opacity:1} }
 
+  /* SLIDESHOW */
+  #gallery { background: var(--navy); }
+
+  .slideshow-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+    aspect-ratio: 16/9;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.7s ease;
+  }
+  .slide.active { opacity: 1; }
+
+  .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .slide-caption {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.75));
+    padding: 32px 20px 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+  }
+
+  .slide-counter {
+    position: absolute;
+    top: 14px; right: 16px;
+    background: rgba(0,0,0,0.55);
+    color: var(--gold);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    z-index: 10;
+  }
+
+  .slide-btn {
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    background: rgba(245,195,0,0.85);
+    color: var(--navy);
+    border: none;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 10;
+    transition: background .2s, transform .2s;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900;
+  }
+  .slide-btn:hover { background: #fff; transform: translateY(-50%) scale(1.1); }
+  .slide-btn.prev { left: 14px; }
+  .slide-btn.next { right: 14px; }
+
+  .slide-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(245,195,0,0.25);
+    cursor: pointer;
+    transition: background .2s, transform .2s;
+    border: none;
+  }
+  .dot.active { background: var(--gold); transform: scale(1.3); }
+
+  .slideshow-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--gray);
+    font-size: 15px;
+  }
+
   /* FOOTER */
   footer { background:var(--navy-mid); border-top:3px solid var(--gold); padding:36px 24px; text-align:center; }
   footer .footer-name { font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:3px; color:var(--gold); margin-bottom:8px; }
@@ -162,9 +264,21 @@
 <nav>
   <a href="#services">Services</a>
   <a href="#reviews">Reviews</a>
+  <a href="#gallery">Our Work</a>
   <a href="#enquiry">Get a Quote</a>
   <a href="tel:07563007299">📞 Call Now</a>
 </nav>
+
+<!-- GALLERY -->
+<section id="gallery" style="padding: 0; background: var(--navy);">
+  <div class="slideshow-wrap" id="slideshowWrap" style="max-width:100%; border-radius:0; aspect-ratio:21/9;">
+    <div class="slideshow-loading" id="slideshowLoading">⚡ Loading gallery…</div>
+    <div class="slide-counter" id="slideCounter" style="display:none"></div>
+    <button class="slide-btn prev" id="prevBtn" style="display:none" onclick="changeSlide(-1)">&#8249;</button>
+    <button class="slide-btn next" id="nextBtn" style="display:none" onclick="changeSlide(1)">&#8250;</button>
+  </div>
+  <div class="slide-dots" id="slideDots" style="padding: 16px 0; background: var(--navy);"></div>
+</section>
 
 <!-- SERVICES -->
 <section id="services">
@@ -291,7 +405,6 @@
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
   <div class="footer-name">Doctor Spark ⚡</div>
   <p>The Electrical Medic · Fully Qualified &amp; Accredited</p>
@@ -469,6 +582,111 @@
 
   // ── INIT LOAD ──
   loadReviews();
+
+  // ── SLIDESHOW ──
+  // Add your images as work1.JPG, work2.JPG, work3.JPG etc. in /images/ folder
+  // The slideshow will automatically detect however many you have (up to 50)
+
+  const captions = {
+    'work1.JPG':  'Man Cave Wiring',
+    'work2.JPG':  'Electrical Installation',
+    'work3.JPG':  'Concert Venue Setup',
+    'work4.JPG':  'Home Recording Studio',
+    'work5.JPG':  'Socket Installation',
+    'work6.JPG':  'Outdoor Flood Light Fitted',
+    'work7.JPG':  'Attic / Loft Electrics',
+    'work8.JPG':  'Studio Audio Setup',
+    'work9.JPG':  'Outdoor Security Light',
+    'work10.JPG': 'Man Cave Projection Screen',
+    'work11.JPG': 'Man Cave Bar',
+    'work12.JPG': 'Security Flood Light',
+  };
+
+  let slides = [];
+  let current = 0;
+  let autoTimer;
+
+  async function initSlideshow() {
+    const wrap = document.getElementById('slideshowWrap');
+    const loading = document.getElementById('slideshowLoading');
+    const dotsEl = document.getElementById('slideDots');
+
+    // Try loading images work1.JPG ... work50.JPG
+    // We check each one by attempting to load it
+    const found = [];
+    const checks = [];
+
+    for (let i = 1; i <= 50; i++) {
+      const filename = `work${i}.JPG`;
+      checks.push(new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(filename);
+        img.onerror = () => resolve(null);
+        img.src = `./images/${filename}`;
+      }));
+    }
+
+    const results = await Promise.all(checks);
+    results.forEach(f => { if (f) found.push(f); });
+
+    if (found.length === 0) {
+      loading.textContent = 'No images found. Add work1.JPG, work2.JPG… to /images/ folder.';
+      return;
+    }
+
+    loading.remove();
+    document.getElementById('slideCounter').style.display = 'block';
+    document.getElementById('prevBtn').style.display = 'flex';
+    document.getElementById('nextBtn').style.display = 'flex';
+
+    // Build slides
+    found.forEach((filename, i) => {
+      const div = document.createElement('div');
+      div.className = 'slide' + (i === 0 ? ' active' : '');
+      div.innerHTML = `
+        <img src="./images/${filename}" alt="Work image ${i+1}" loading="lazy">
+        <div class="slide-caption">${captions[filename] || 'Electrical Work by Doctor Spark'}</div>
+      `;
+      wrap.appendChild(div);
+      slides.push(div);
+
+      // dot
+      const dot = document.createElement('button');
+      dot.className = 'dot' + (i === 0 ? ' active' : '');
+      dot.setAttribute('aria-label', `Slide ${i+1}`);
+      dot.onclick = () => goToSlide(i);
+      dotsEl.appendChild(dot);
+    });
+
+    updateCounter();
+    startAuto();
+  }
+
+  function updateCounter() {
+    document.getElementById('slideCounter').textContent = `${current + 1} / ${slides.length}`;
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  function goToSlide(n) {
+    slides[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    updateCounter();
+    restartAuto();
+  }
+
+  function changeSlide(dir) { goToSlide(current + dir); }
+
+  function startAuto() { autoTimer = setInterval(() => changeSlide(1), 4000); }
+  function restartAuto() { clearInterval(autoTimer); startAuto(); }
+
+  // Keyboard nav
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft') changeSlide(-1);
+    if (e.key === 'ArrowRight') changeSlide(1);
+  });
+
+  initSlideshow();
 </script>
 </body>
 </html>
