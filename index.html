@@ -584,22 +584,22 @@
   loadReviews();
 
   // ── SLIDESHOW ──
-  // Add your images as work1.JPG, work2.JPG, work3.JPG etc. in /images/ folder
+  // Add your images as work1.jpg, work2.jpg, work3.jpg etc. in /images/ folder
   // The slideshow will automatically detect however many you have (up to 50)
 
   const captions = {
-    'work1.JPG':  'Man Cave Wiring',
-    'work2.JPG':  'Electrical Installation',
-    'work3.JPG':  'Concert Venue Setup',
-    'work4.JPG':  'Home Recording Studio',
-    'work5.JPG':  'Socket Installation',
-    'work6.JPG':  'Outdoor Flood Light Fitted',
-    'work7.JPG':  'Attic / Loft Electrics',
-    'work8.JPG':  'Studio Audio Setup',
-    'work9.JPG':  'Outdoor Security Light',
-    'work10.JPG': 'Man Cave Projection Screen',
-    'work11.JPG': 'Man Cave Bar',
-    'work12.JPG': 'Security Flood Light',
+    'work1.jpg':  'Man Cave Wiring',
+    'work2.jpg':  'Electrical Installation',
+    'work3.jpg':  'Concert Venue Setup',
+    'work4.jpg':  'Home Recording Studio',
+    'work5.jpg':  'Socket Installation',
+    'work6.jpg':  'Outdoor Flood Light Fitted',
+    'work7.jpg':  'Attic / Loft Electrics',
+    'work8.jpg':  'Studio Audio Setup',
+    'work9.jpg':  'Outdoor Security Light',
+    'work10.jpg': 'Man Cave Projection Screen',
+    'work11.jpg': 'Man Cave Bar',
+    'work12.jpg': 'Security Flood Light',
   };
 
   let slides = [];
@@ -611,7 +611,7 @@
     const loading = document.getElementById('slideshowLoading');
     const dotsEl = document.getElementById('slideDots');
 
-    // Try loading images work1.JPG ... work50.JPG
+    // Try loading images work1.jpg ... work50.jpg
     // We check each one by attempting to load it
     const found = [];
     const checks = [];
@@ -630,7 +630,7 @@
     results.forEach(f => { if (f) found.push(f); });
 
     if (found.length === 0) {
-      loading.textContent = 'No images found. Add work1.JPG, work2.JPG… to /images/ folder.';
+      loading.textContent = 'No images found. Add work1.jpg, work2.jpg… to /images/ folder.';
       return;
     }
 
