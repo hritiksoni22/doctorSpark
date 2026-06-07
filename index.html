@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doctor Spark – The Electrical Medic</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  :root {
+    --gold: #F5C300;
+    --gold-dark: #C9980A;
+    --navy: #0A1628;
+    --navy-mid: #0F2044;
+    --navy-light: #1A3060;
+    --white: #FFFFFF;
+    --gray: #8A9BB5;
+    --lightning: #7EC8E3;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Barlow', sans-serif; background: var(--navy); color: var(--white); overflow-x: hidden; }
+
+  /* HEADER */
+  header { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); position: relative; overflow: hidden; }
+  header::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 70% 50%, rgba(245,195,0,0.12) 0%, transparent 60%); }
+  header::after { content:''; position:absolute; top:-40px; right:80px; width:3px; height:200px; background:linear-gradient(180deg,transparent,var(--gold),transparent); transform:rotate(15deg); opacity:0.3; animation:bolt 4s ease-in-out infinite; }
+  @keyframes bolt { 0%,100%{opacity:.1} 50%{opacity:.5} }
+
+  .hero-inner { max-width:1100px; margin:0 auto; padding:48px 24px 40px; display:flex; align-items:center; gap:48px; flex-wrap:wrap; }
+  .logo-block { flex:1; min-width:260px; }
+  .logo-block h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(52px,7vw,88px); line-height:0.9; letter-spacing:2px; background:linear-gradient(135deg,#fff 30%,var(--gold) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .bolt-icon { display:inline-block; color:var(--gold); -webkit-text-fill-color:var(--gold); animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scaleY(1)} 50%{opacity:.7;transform:scaleY(1.1)} }
+  .tagline { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:700; color:var(--gold); letter-spacing:3px; text-transform:uppercase; margin-top:6px; margin-bottom:16px; }
+  .badge { display:inline-block; background:var(--gold); color:var(--navy); font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:13px; letter-spacing:2px; padding:5px 16px; clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%); margin-bottom:8px; text-transform:uppercase; }
+  .hero-contact { flex:1; min-width:220px; }
+  .phone-display { font-family:'Bebas Neue',sans-serif; font-size:clamp(34px,5vw,52px); letter-spacing:3px; color:var(--gold); display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+  .call-label { font-size:13px; color:var(--gray); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
+  .contact-links { margin-top:16px; display:flex; flex-direction:column; gap:6px; }
+  .contact-links a { color:var(--lightning); text-decoration:none; font-size:15px; display:flex; align-items:center; gap:8px; transition:color .2s; }
+  .contact-links a:hover { color:var(--gold); }
+  .certified-badge { margin-top:20px; border:2px solid var(--gold); border-radius:8px; padding:10px 16px; display:inline-block; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:13px; letter-spacing:1.5px; color:var(--gold); text-transform:uppercase; }
+
+  /* NAV */
+  nav { background:var(--gold); display:flex; justify-content:center; position:sticky; top:0; z-index:100; box-shadow:0 4px 20px rgba(0,0,0,0.4); flex-wrap:wrap; }
+  nav a { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; letter-spacing:2px; text-transform:uppercase; color:var(--navy); text-decoration:none; padding:14px 28px; transition:background .2s,color .2s; }
+  nav a:hover { background:var(--navy); color:var(--gold); }
+
+  /* SECTIONS */
+  section { padding:72px 24px; }
+  .section-inner { max-width:1100px; margin:0 auto; }
+  .section-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(36px,5vw,60px); letter-spacing:2px; margin-bottom:8px; }
+  .section-title span { color:var(--gold); }
+  .divider { width:60px; height:4px; background:var(--gold); margin-bottom:40px; }
+
+  /* SERVICES */
+  #services { background:var(--navy-mid); }
+  .services-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; }
+  .service-card { background:var(--navy); border:1px solid rgba(245,195,0,0.2); border-left:4px solid var(--gold); padding:24px 20px; border-radius:4px; transition:transform .2s,box-shadow .2s; }
+  .service-card:hover { transform:translateY(-4px); box-shadow:0 8px 32px rgba(245,195,0,0.15); }
+  .service-icon { font-size:28px; margin-bottom:12px; }
+  .service-card h3 { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:18px; letter-spacing:1px; color:var(--gold); margin-bottom:6px; }
+  .service-card p { font-size:14px; color:var(--gray); line-height:1.5; }
+
+  /* REVIEWS */
+  #reviews { background:var(--navy); }
+  .reviews-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:24px; margin-bottom:40px; }
+  .review-card { background:var(--navy-mid); border-radius:8px; padding:28px; border:1px solid rgba(245,195,0,0.15); position:relative; transition:box-shadow .3s; animation:fadeIn .5s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  .review-card:hover { box-shadow:0 8px 32px rgba(245,195,0,0.1); }
+  .review-card::before { content:'"'; font-family:'Bebas Neue',sans-serif; font-size:80px; color:var(--gold); opacity:0.2; position:absolute; top:8px; left:16px; line-height:1; }
+  .stars { color:var(--gold); font-size:18px; margin-bottom:12px; }
+  .review-card p { font-size:15px; line-height:1.7; color:#cdd6e8; margin-bottom:16px; }
+  .reviewer { font-family:'Barlow Condensed',sans-serif; font-weight:700; color:var(--gold); letter-spacing:1px; font-size:14px; }
+  .review-date { font-size:12px; color:var(--gray); margin-top:4px; }
+
+  .reviews-loading { text-align:center; color:var(--gray); padding:40px; font-size:15px; }
+
+  /* POST REVIEW FORM */
+  .post-review-box { background:var(--navy-mid); border:1px solid rgba(245,195,0,0.25); border-radius:8px; padding:36px; max-width:680px; }
+  .post-review-box h3 { font-family:'Bebas Neue',sans-serif; font-size:32px; color:var(--gold); margin-bottom:24px; letter-spacing:2px; }
+
+  /* ENQUIRY */
+  #enquiry { background:var(--navy-mid); }
+  .enquiry-wrap { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start; }
+  @media(max-width:700px){ .enquiry-wrap{grid-template-columns:1fr;} }
+  .enquiry-info h3 { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--gold); margin-bottom:16px; letter-spacing:2px; }
+  .enquiry-info p { color:var(--gray); line-height:1.7; margin-bottom:20px; }
+  .info-item { display:flex; align-items:center; gap:12px; margin-bottom:14px; font-size:15px; }
+  .info-item .lbl { color:var(--gray); font-size:12px; letter-spacing:1px; text-transform:uppercase; }
+  .info-item .val { color:var(--white); font-weight:600; }
+
+  /* FORM STYLES */
+  .form-group { margin-bottom:18px; }
+  label { display:block; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:13px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
+  input, textarea, select { width:100%; background:var(--navy); border:1px solid rgba(245,195,0,0.3); border-radius:4px; padding:12px 14px; color:var(--white); font-family:'Barlow',sans-serif; font-size:15px; outline:none; transition:border-color .2s,box-shadow .2s; }
+  input:focus, textarea:focus, select:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(245,195,0,0.12); }
+  textarea { resize:vertical; min-height:100px; }
+  select option { background:var(--navy); }
+
+  /* STAR RATING */
+  .star-rating { display:flex; flex-direction:row-reverse; justify-content:flex-end; gap:6px; margin-bottom:4px; }
+  .star-rating input { display:none; }
+  .star-rating label { font-size:30px; color:rgba(255,255,255,0.2); cursor:pointer; transition:color .15s; letter-spacing:0; text-transform:none; margin:0; padding:0; width:auto; }
+  .star-rating input:checked ~ label,
+  .star-rating label:hover,
+  .star-rating label:hover ~ label { color:var(--gold); }
+
+  /* BUTTONS */
+  .btn { background:var(--gold); color:var(--navy); border:none; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:16px; letter-spacing:2px; text-transform:uppercase; padding:14px 36px; cursor:pointer; clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%); transition:background .2s,transform .1s; }
+  .btn:hover { background:#fff; transform:translateY(-2px); }
+  .btn:active { transform:translateY(0); }
+  .btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+
+  .success-msg { display:none; background:rgba(245,195,0,0.1); border:1px solid var(--gold); border-radius:6px; padding:14px 18px; color:var(--gold); font-weight:600; margin-top:12px; }
+  .error-msg { display:none; background:rgba(255,60,60,0.1); border:1px solid #ff3c3c; border-radius:6px; padding:14px 18px; color:#ff6b6b; font-weight:600; margin-top:12px; }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:30px; right:30px; padding:14px 24px; border-radius:6px; font-weight:700; font-family:'Barlow Condensed',sans-serif; letter-spacing:1px; font-size:15px; display:none; z-index:9999; animation:slideIn .3s ease; }
+  .toast.success { background:var(--gold); color:var(--navy); }
+  .toast.error { background:#ff3c3c; color:#fff; }
+  @keyframes slideIn { from{transform:translateX(100px);opacity:0} to{transform:translateX(0);opacity:1} }
+
+  /* FOOTER */
+  footer { background:var(--navy-mid); border-top:3px solid var(--gold); padding:36px 24px; text-align:center; }
+  footer .footer-name { font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:3px; color:var(--gold); margin-bottom:8px; }
+  footer p { color:var(--gray); font-size:14px; margin-bottom:4px; }
+  footer .social { margin-top:16px; display:flex; justify-content:center; gap:20px; flex-wrap:wrap; }
+  footer .social a { color:var(--lightning); text-decoration:none; font-size:14px; transition:color .2s; }
+  footer .social a:hover { color:var(--gold); }
+  .diversity-bar { background:linear-gradient(90deg,#FF0018,#FFA500,#FFFF00,#008018,#0000F9,#86007D,#FF69B4,#FFFFFF,#FFD700,#7F4F00,#000000); height:6px; width:100%; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="hero-inner">
+    <div class="logo-block">
+      <div class="badge">Fully Qualified & Accredited</div>
+      <h1>Doctor<br>Spark<span class="bolt-icon">⚡</span></h1>
+      <div class="tagline">The Electrical Medic</div>
+      <p style="color:#8A9BB5;font-size:15px;line-height:1.6;">Local, reliable electrician · Electrician, Inspector &amp; Tester<br>All appointments attended · All work fully tested &amp; certificated</p>
+    </div>
+    <div class="hero-contact">
+      <div class="call-label">Call the Doctor on</div>
+      <div class="phone-display">📞 07563 007299</div>
+      <div class="contact-links">
+        <a href="mailto:Doctorsparkelec@gmail.com">✉ Doctorsparkelec@gmail.com</a>
+        <a href="https://facebook.com/DoctorSparkTheElectricalMedic" target="_blank">📘 DoctorSparkTheElectricalMedic</a>
+        <a href="https://instagram.com/doctor_spark_electrical" target="_blank">📷 @doctor_spark_electrical</a>
+      </div>
+      <div class="certified-badge">✔ All Work Fully Tested &amp; Certificated</div>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav>
+  <a href="#services">Services</a>
+  <a href="#reviews">Reviews</a>
+  <a href="#enquiry">Get a Quote</a>
+  <a href="tel:07563007299">📞 Call Now</a>
+</nav>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-inner">
+    <div class="section-title">Our <span>Services</span></div>
+    <div class="divider"></div>
+    <div class="services-grid">
+      <div class="service-card"><div class="service-icon">💡</div><h3>Light Fittings Changed</h3><p>Upgrade or replace any light fitting quickly and safely, certified to the latest standards.</p></div>
+      <div class="service-card"><div class="service-icon">🏠</div><h3>"Man Caves" Wired</h3><p>Full electrical installation for garages, garden rooms, summerhouses and man caves.</p></div>
+      <div class="service-card"><div class="service-icon">🔌</div><h3>Full Rewires</h3><p>Complete house rewires carried out to a high standard with minimal disruption.</p></div>
+      <div class="service-card"><div class="service-icon">🔍</div><h3>Fault Finding</h3><p>Fast, systematic diagnosis and repair of electrical faults in any domestic property.</p></div>
+      <div class="service-card"><div class="service-icon">🏗️</div><h3>Attics Electrified</h3><p>Loft conversions wired from scratch including lighting, sockets and consumer units.</p></div>
+      <div class="service-card"><div class="service-icon">🛡️</div><h3>Inspection &amp; Testing</h3><p>EICR electrical reports, periodic inspection and testing — all work certificated.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews">
+  <div class="section-inner">
+    <div class="section-title">What Customers <span>Say</span></div>
+    <div class="divider"></div>
+
+    <!-- Reviews loaded from Supabase -->
+    <div id="reviews-container" class="reviews-grid">
+      <div class="reviews-loading">⚡ Loading reviews…</div>
+    </div>
+
+    <!-- Post a review -->
+    <div class="post-review-box">
+      <h3>Leave Your Review</h3>
+      <form id="reviewForm">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" id="rName" placeholder="e.g. Jane Smith" required>
+        </div>
+        <div class="form-group">
+          <label>Your Rating</label>
+          <div class="star-rating">
+            <input type="radio" id="s5" name="rating" value="5"><label for="s5">★</label>
+            <input type="radio" id="s4" name="rating" value="4"><label for="s4">★</label>
+            <input type="radio" id="s3" name="rating" value="3"><label for="s3">★</label>
+            <input type="radio" id="s2" name="rating" value="2"><label for="s2">★</label>
+            <input type="radio" id="s1" name="rating" value="1"><label for="s1">★</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Your Review</label>
+          <textarea id="rText" placeholder="Tell others about your experience…" required></textarea>
+        </div>
+        <button type="submit" class="btn" id="reviewBtn">Post Review ⚡</button>
+        <div class="success-msg" id="reviewSuccess">✔ Thank you! Your review has been posted.</div>
+        <div class="error-msg" id="reviewError">✖ Something went wrong. Please try again.</div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ENQUIRY -->
+<section id="enquiry">
+  <div class="section-inner">
+    <div class="section-title">Get a <span>Quote</span></div>
+    <div class="divider"></div>
+    <div class="enquiry-wrap">
+      <div class="enquiry-info">
+        <h3>Get In Touch</h3>
+        <p>Fill in the form and Simon will get back to you promptly. All enquiries welcome — no job too big or too small.</p>
+        <div class="info-item">📞 <div><div class="lbl">Phone</div><div class="val">07563 007299</div></div></div>
+        <div class="info-item">✉ <div><div class="lbl">Email</div><div class="val">Doctorsparkelec@gmail.com</div></div></div>
+        <div class="info-item">📘 <div><div class="lbl">Facebook</div><div class="val">DoctorSparkTheElectricalMedic</div></div></div>
+        <div class="info-item">📷 <div><div class="lbl">Instagram</div><div class="val">@doctor_spark_electrical</div></div></div>
+        <div style="margin-top:24px;padding:20px;background:var(--navy);border-left:4px solid var(--gold);border-radius:4px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;color:var(--gold);letter-spacing:1px;margin-bottom:6px;">Perfection in Every Connection</div>
+          <div style="color:var(--gray);font-size:14px;">All appointments attended · Fully insured · Work certificated</div>
+        </div>
+      </div>
+
+      <div>
+        <form id="enquiryForm">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" id="eName" placeholder="Your full name" required>
+          </div>
+          <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" id="eEmail" placeholder="your@email.com" required>
+          </div>
+          <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" id="ePhone" placeholder="07xxx xxxxxx" required>
+          </div>
+          <div class="form-group">
+            <label>Type of Work Required</label>
+            <select id="eWorkType">
+              <option value="">— Select a service —</option>
+              <option>Light Fittings Changed</option>
+              <option>Man Cave / Outbuilding Wiring</option>
+              <option>Full Rewire</option>
+              <option>Fault Finding</option>
+              <option>Attic / Loft Electrics</option>
+              <option>Inspection &amp; Testing (EICR)</option>
+              <option>Other / Not Sure</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tell Us About Your Job</label>
+            <textarea id="eMessage" placeholder="Please describe the work needed, your location, and any other relevant details…" required></textarea>
+          </div>
+          <div class="form-group">
+            <label>Best Time to Contact</label>
+            <select id="eContactTime">
+              <option value="Anytime">— Anytime —</option>
+              <option>Morning (8am–12pm)</option>
+              <option>Afternoon (12pm–5pm)</option>
+              <option>Evening (5pm–8pm)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn" id="enquiryBtn">Send Enquiry ⚡</button>
+          <div class="success-msg" id="enquirySuccess">✔ Thank you! Simon will be in touch shortly.</div>
+          <div class="error-msg" id="enquiryError">✖ Failed to send. Please call Simon directly on 07563 007299.</div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-name">Doctor Spark ⚡</div>
+  <p>The Electrical Medic · Fully Qualified &amp; Accredited</p>
+  <p>Electrician · Inspector · Tester</p>
+  <div class="social">
+    <a href="tel:07563007299">📞 07563 007299</a>
+    <a href="mailto:Doctorsparkelec@gmail.com">✉ Email Simon</a>
+    <a href="https://facebook.com/DoctorSparkTheElectricalMedic" target="_blank">📘 Facebook</a>
+    <a href="https://instagram.com/doctor_spark_electrical" target="_blank">📷 Instagram</a>
+  </div>
+  <p style="margin-top:20px;font-size:12px;color:#556;">© 2025 Doctor Spark Electrical. All rights reserved.</p>
+  <div style="margin-top:20px;">
+    <div class="diversity-bar"></div>
+    <p style="margin-top:8px;font-size:11px;color:#667;letter-spacing:1px;">PROUD TO SUPPORT DIVERSITY &amp; INCLUSION</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── CONFIG ──
+  const SUPABASE_URL = 'https://rpgegivnsnwretjftffw.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_XWrcNHzNUhL3xfSur2-3eA_m_p7tQ6s';
+  const EMAILJS_PUBLIC_KEY = 'dxY6oHzCXH0bnFg_s';
+  const EMAILJS_SERVICE_ID = 'service_7qvnph2';
+  const EMAILJS_TEMPLATE_ID = 'template_6a1umlm';
+
+  // ── INIT ──
+  const { createClient } = supabase;
+  const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+  emailjs.init(EMAILJS_PUBLIC_KEY);
+
+  // ── TOAST ──
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type}`;
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 4000);
+  }
+
+  // ── RENDER A SINGLE REVIEW CARD ──
+  function renderCard(r) {
+    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+    const date = new Date(r.created_at).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+    const div = document.createElement('div');
+    div.className = 'review-card';
+    div.innerHTML = `
+      <div class="stars">${stars}</div>
+      <p>${r.message}</p>
+      <div class="reviewer">— ${r.name}</div>
+      <div class="review-date">${date}</div>
+    `;
+    return div;
+  }
+
+  // ── LOAD REVIEWS FROM SUPABASE ──
+  async function loadReviews() {
+    const container = document.getElementById('reviews-container');
+    try {
+      const { data, error } = await db
+        .from('reviews')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      container.innerHTML = '';
+
+      if (error) throw error;
+
+      // Always show the 3 hardcoded reviews first
+      const hardcoded = [
+        { name:'Verified Customer', rating:5, message:'Simon wired my summerhouse up and did a perfect job. He is a perfectionist and that\'s the best way to be with electrics. Would highly recommend — he also works with a smile on his face unlike a lot of sparkys I\'ve used before.', created_at: new Date().toISOString() },
+        { name:'Verified Customer', rating:5, message:'We needed several electrical sockets moving and replacing. Simon was very professional and courteous. He did a good job, no mess and a great price. Would highly recommend and we will be using his services again.', created_at: new Date().toISOString() },
+        { name:'Local Resident', rating:5, message:'Excellent service from start to finish. Called in the morning, Simon was there same afternoon. Sorted our fault quickly, fair price and left everything tidy. Definitely our go-to electrician from now on.', created_at: new Date().toISOString() },
+      ];
+
+      const all = [...(data || []), ...hardcoded];
+
+      if (all.length === 0) {
+        container.innerHTML = '<p style="color:var(--gray)">No reviews yet — be the first!</p>';
+        return;
+      }
+
+      all.forEach(r => container.appendChild(renderCard(r)));
+
+    } catch(err) {
+      console.error(err);
+      container.innerHTML = '<p style="color:var(--gray)">Could not load reviews right now.</p>';
+    }
+  }
+
+  // ── SUBMIT REVIEW TO SUPABASE ──
+  document.getElementById('reviewForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('reviewBtn');
+    const successEl = document.getElementById('reviewSuccess');
+    const errorEl = document.getElementById('reviewError');
+
+    const name = document.getElementById('rName').value.trim();
+    const message = document.getElementById('rText').value.trim();
+    const ratingInput = document.querySelector('input[name="rating"]:checked');
+    const rating = ratingInput ? parseInt(ratingInput.value) : null;
+
+    if (!name || !message || !rating) {
+      showToast('Please fill in all fields and select a rating.', 'error');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Posting…';
+    successEl.style.display = 'none';
+    errorEl.style.display = 'none';
+
+    try {
+      const { error } = await db.from('reviews').insert([{ name, rating, message }]);
+      if (error) throw error;
+
+      successEl.style.display = 'block';
+      this.reset();
+      showToast('✔ Review posted — thank you!');
+      await loadReviews();
+    } catch(err) {
+      console.error(err);
+      errorEl.style.display = 'block';
+      showToast('✖ Could not post review. Please try again.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Post Review ⚡';
+    }
+  });
+
+  // ── SEND ENQUIRY VIA EMAILJS ──
+  document.getElementById('enquiryForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('enquiryBtn');
+    const successEl = document.getElementById('enquirySuccess');
+    const errorEl = document.getElementById('enquiryError');
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    successEl.style.display = 'none';
+    errorEl.style.display = 'none';
+
+    const params = {
+      name:         document.getElementById('eName').value.trim(),
+      email:        document.getElementById('eEmail').value.trim(),
+      phone:        document.getElementById('ePhone').value.trim(),
+      work_type:    document.getElementById('eWorkType').value || 'Not specified',
+      message:      document.getElementById('eMessage').value.trim(),
+      contact_time: document.getElementById('eContactTime').value,
+    };
+
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params);
+      successEl.style.display = 'block';
+      this.reset();
+      showToast('✔ Enquiry sent! Simon will be in touch.');
+    } catch(err) {
+      console.error(err);
+      errorEl.style.display = 'block';
+      showToast('✖ Failed to send. Please call Simon directly.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Send Enquiry ⚡';
+    }
+  });
+
+  // ── SMOOTH SCROLL ──
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const el = document.querySelector(a.getAttribute('href'));
+      if (el) { e.preventDefault(); el.scrollIntoView({behavior:'smooth'}); }
+    });
+  });
+
+  // ── INIT LOAD ──
+  loadReviews();
+</script>
+</body>
+</html>
